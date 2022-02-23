@@ -21,6 +21,7 @@
 set -o errexit
 set -o nounset
 set -o pipefail
+set -x
 
 # Install kubectl and helm
 REPO_ROOT=$(dirname "${BASH_SOURCE[0]}")/..
@@ -52,6 +53,7 @@ get_random_region() {
 
 setup() {
     # setup REGISTRY for custom images.
+    export REGISTRY="zhechengliregistry.azurecr.io"
     : "${REGISTRY:?Environment variable empty or not defined.}"
     "${REPO_ROOT}/hack/ensure-acr-login.sh"
     if [[ -z "${CLUSTER_TEMPLATE:-}" ]]; then

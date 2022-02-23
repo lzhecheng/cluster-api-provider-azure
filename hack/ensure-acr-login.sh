@@ -34,4 +34,6 @@ if [[ "${REGISTRY:-}" =~ capzci\.azurecr\.io ]]; then
     # Issue link: https://github.com/Azure/acr/issues/582
     # Failed building link: https://prow.k8s.io/view/gs/kubernetes-jenkins/pr-logs/pull/kubernetes-sigs_cloud-provider-azure/974/pull-cloud-provider-azure-e2e-ccm-capz/1480459040440979456
     docker login -u "${AZURE_CLIENT_ID}" -p "${AZURE_CLIENT_SECRET}" capzci.azurecr.io
+else
+    docker login -u "${AZURE_CLIENT_ID}" -p "${AZURE_CLIENT_SECRET}" ${REGISTRY}
 fi
