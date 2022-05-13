@@ -559,6 +559,7 @@ You can optionally set the following variables:
 | `TEST_WINDOWS`                  | Build a cluster that has Windows worker nodes.          |
 | `REGISTRY`                  | Registry to push any custom k8s images or cloud provider images built.                                                                     |
 | `CLUSTER_TEMPLATE`          | Use a custom cluster template. By default, the script will choose the appropriate cluster template based on existing environment variables. |
+| `CLUSTER_TEMPLATE_LINK` | Use a custom cluster template link outside of CAPZ repo. |
 
 You can also customize the configuration of the CAPZ cluster (assuming that `SKIP_CREATE_WORKLOAD_CLUSTER` is not set). See [Customizing the cluster deployment](#customizing-the-cluster-deployment) for more details.
 

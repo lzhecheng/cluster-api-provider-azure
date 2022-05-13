@@ -70,6 +70,17 @@ setup() {
 }
 
 select_cluster_template() {
+    # this requires k8s 1.22+
+    if [[ -n "${TEST_WINDOWS:-}" ]]; then
+        export WINDOWS_WORKER_MACHINE_COUNT="${WINDOWS_WORKER_MACHINE_COUNT:-2}"
+        export K8S_FEATURE_GATES="WindowsHostProcessContainers=true"
+    fi
+
+    if [[ -n "${CLUSTER_TEMPLATE_LINK}" ]]; then
+        export CLUSTER_TEMPLATE="${CLUSTER_TEMPLATE_LINK}"
+        return
+    fi
+
     if [[ "$(capz::util::should_build_kubernetes)" == "true" ]]; then
         # shellcheck source=scripts/ci-build-kubernetes.sh
         source "${REPO_ROOT}/scripts/ci-build-kubernetes.sh"
@@ -92,10 +103,6 @@ select_cluster_template() {
 
     if [[ -n "${TEST_CCM:-}" ]]; then
         export CLUSTER_TEMPLATE="test/ci/cluster-template-prow-external-cloud-provider.yaml"
-        # shellcheck source=scripts/ci-build-azure-ccm.sh
-        source "${REPO_ROOT}/scripts/ci-build-azure-ccm.sh"
-        echo "Will use the ${IMAGE_REGISTRY}/${CCM_IMAGE_NAME}:${IMAGE_TAG} cloud-controller-manager image for external cloud-provider-cluster"
-        echo "Will use the ${IMAGE_REGISTRY}/${CNM_IMAGE_NAME}:${IMAGE_TAG} cloud-node-manager image for external cloud-provider-azure cluster"
     fi
 
     if [[ "${EXP_MACHINE_POOL:-}" == "true" ]]; then
@@ -104,12 +111,6 @@ select_cluster_template() {
         elif [[ "${CLUSTER_TEMPLATE}" =~ "custom-builds" ]]; then
             export CLUSTER_TEMPLATE="${CLUSTER_TEMPLATE/custom-builds/custom-builds-machine-pool}"
         fi
-    fi
-
-    # this requires k8s 1.22+
-    if [[ -n "${TEST_WINDOWS:-}" ]]; then
-        export WINDOWS_WORKER_MACHINE_COUNT="${WINDOWS_WORKER_MACHINE_COUNT:-2}"
-        export K8S_FEATURE_GATES="WindowsHostProcessContainers=true"
     fi
 }
 
@@ -159,8 +160,13 @@ export KUBECONFIG="${KUBECONFIG:-${PWD}/kubeconfig}"
 
 # install cloud-provider-azure components, if using out-of-tree
 if [[ -n "${TEST_CCM:-}" ]]; then
-  echo "Installing cloud-provider-azure components via helm"
-  "${HELM}" install --repo https://raw.githubusercontent.com/kubernetes-sigs/cloud-provider-azure/master/helm/repo cloud-provider-azure --generate-name --set infra.clusterName="${CLUSTER_NAME}" --set cloudControllerManager.imageRepository="${IMAGE_REGISTRY}" \
+    # shellcheck source=scripts/ci-build-azure-ccm.sh
+    source "${REPO_ROOT}/scripts/ci-build-azure-ccm.sh"
+    echo "Will use the ${IMAGE_REGISTRY}/${CCM_IMAGE_NAME}:${IMAGE_TAG} cloud-controller-manager image for external cloud-provider-cluster"
+    echo "Will use the ${IMAGE_REGISTRY}/${CNM_IMAGE_NAME}:${IMAGE_TAG} cloud-node-manager image for external cloud-provider-azure cluster"
+
+    echo "Installing cloud-provider-azure components via helm"
+    "${HELM}" install --repo https://raw.githubusercontent.com/kubernetes-sigs/cloud-provider-azure/master/helm/repo cloud-provider-azure --generate-name --set infra.clusterName="${CLUSTER_NAME}" --set cloudControllerManager.imageRepository="${IMAGE_REGISTRY}" \
 --set cloudNodeManager.imageRepository="${IMAGE_REGISTRY}" \
 --set cloudControllerManager.imageName="${CCM_IMAGE_NAME}" \
 --set cloudNodeManager.imageName="${CNM_IMAGE_NAME}" \
