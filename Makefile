@@ -209,8 +209,8 @@ clean-bin: ## Remove all generated binaries.
 .PHONY: clean-temporary
 clean-temporary: ## Remove all temporary files and folders.
 	rm -f minikube.kubeconfig
-	rm -f kubeconfig
-	rm -f *.kubeconfig
+	# rm -f kubeconfig
+	# rm -f *.kubeconfig
 
 .PHONY: clean-release
 clean-release: ## Remove the release folder.

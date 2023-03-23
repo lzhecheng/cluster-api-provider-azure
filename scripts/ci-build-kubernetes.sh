@@ -29,6 +29,8 @@ source "${REPO_ROOT}/hack/ensure-azcli.sh"
 source "${REPO_ROOT}/hack/ensure-go.sh"
 # shellcheck source=hack/parse-prow-creds.sh
 source "${REPO_ROOT}/hack/parse-prow-creds.sh"
+# shellcheck source=hack/util.sh
+source "${REPO_ROOT}/hack/util.sh"
 
 : "${AZURE_STORAGE_ACCOUNT:?Environment variable empty or not defined.}"
 : "${AZURE_STORAGE_KEY:?Environment variable empty or not defined.}"
@@ -47,7 +49,7 @@ if [[ "${OSTYPE}" == "darwin"* ]]; then
 fi
 
 setup() {
-    KUBE_ROOT="$(go env GOPATH)/src/k8s.io/kubernetes"
+    KUBE_ROOT="/home/zhechengli/github.com/lzhecheng/kubernetes"
     export KUBE_ROOT
 
     # shellcheck disable=SC1091
@@ -92,7 +94,7 @@ main() {
         echo "Building Kubernetes"
 
         # TODO(chewong): support multi-arch and Windows build
-        make -C "${KUBE_ROOT}" quick-release
+        # make -C "${KUBE_ROOT}" quick-release
 
         if [[ "${KUBE_BUILD_CONFORMANCE:-}" =~ [yY] ]]; then
             # rename conformance image since it is the only image that has an amd64 suffix

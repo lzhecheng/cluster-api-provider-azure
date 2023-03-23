@@ -66,10 +66,10 @@ setup() {
         --set-string cloudNodeManager.imageTag="${IMAGE_TAG}")
     fi
 
-    if [[ "$(capz::util::should_build_kubernetes)" == "true" ]]; then
-        # shellcheck source=scripts/ci-build-kubernetes.sh
-        source "${REPO_ROOT}/scripts/ci-build-kubernetes.sh"
-    fi
+    # if [[ "$(capz::util::should_build_kubernetes)" == "true" ]]; then
+    #     # shellcheck source=scripts/ci-build-kubernetes.sh
+    #     source "${REPO_ROOT}/scripts/ci-build-kubernetes.sh"
+    # fi
 
     if [[ "${KUBERNETES_VERSION:-}" =~ "latest" ]]; then
         CI_VERSION_URL="https://dl.k8s.io/ci/${KUBERNETES_VERSION}.txt"
