@@ -54,16 +54,21 @@ setup() {
     "${REPO_ROOT}/hack/ensure-acr-login.sh"
     if [[ "$(capz::util::should_build_ccm)" == "true" ]]; then
         # shellcheck source=scripts/ci-build-azure-ccm.sh
-        source "${REPO_ROOT}/scripts/ci-build-azure-ccm.sh"
-        echo "Will use the ${IMAGE_REGISTRY}/${CCM_IMAGE_NAME}:${IMAGE_TAG_CCM} cloud-controller-manager image for external cloud-provider-cluster"
-        echo "Will use the ${IMAGE_REGISTRY}/${CNM_IMAGE_NAME}:${IMAGE_TAG_CNM} cloud-node-manager image for external cloud-provider-azure cluster"
+        # source "${REPO_ROOT}/scripts/ci-build-azure-ccm.sh"
+        # echo "Will use the ${IMAGE_REGISTRY}/${CCM_IMAGE_NAME}:${IMAGE_TAG_CCM} cloud-controller-manager image for external cloud-provider-cluster"
+        # echo "Will use the ${IMAGE_REGISTRY}/${CNM_IMAGE_NAME}:${IMAGE_TAG_CNM} cloud-node-manager image for external cloud-provider-azure cluster"
 
+        export CCM_IMAGE_NAME="oss/kubernetes/azure-cloud-controller-manager"
+        export CNM_IMAGE_NAME="oss/kubernetes/azure-cloud-node-manager"
+        export IMAGE_REGISTRY="mcr.microsoft.com"
+        export IMAGE_TAG_CCM="v1.27.4"
+        export IMAGE_TAG_CNM="v1.27.4"
         CCM_IMG_ARGS=(--set cloudControllerManager.imageRepository="${IMAGE_REGISTRY}"
         --set cloudNodeManager.imageRepository="${IMAGE_REGISTRY}"
-        --set cloudControllerManager.imageName="${CCM_IMAGE_NAME}"
+        --set cloudControllerManager.imageName="${CCM_IMAGE_NAME:-}"
         --set cloudNodeManager.imageName="${CNM_IMAGE_NAME}"
-        --set-string cloudControllerManager.imageTag="${IMAGE_TAG_CCM}"
-        --set-string cloudNodeManager.imageTag="${IMAGE_TAG_CNM}")
+        --set-string cloudControllerManager.imageTag="${IMAGE_TAG_CCM:-}"
+        --set-string cloudNodeManager.imageTag="${IMAGE_TAG_CNM:-}")
     fi
 
     if [[ "$(capz::util::should_build_kubernetes)" == "true" ]]; then
@@ -311,7 +316,7 @@ on_exit() {
     # we want to be pointing at the management cluster (kind in this case)
     unset KUBECONFIG
     go run -tags e2e "${REPO_ROOT}"/test/logger.go --name "${CLUSTER_NAME}" --namespace default
-    "${REPO_ROOT}/hack/log/redact.sh" || true
+    # "${REPO_ROOT}/hack/log/redact.sh" || true
     # cleanup all resources we use
     if [[ ! "${SKIP_CLEANUP:-}" == "true" ]]; then
         timeout 1800 "${KUBECTL}" --kubeconfig "${REPO_ROOT}/${KIND_CLUSTER_NAME}.kubeconfig" delete cluster "${CLUSTER_NAME}" || echo "Unable to delete cluster ${CLUSTER_NAME}"
